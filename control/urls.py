@@ -18,5 +18,6 @@ from . import views
 
 urlpatterns = [
     url(r'^video_address$', views.video_address),  # 视频播放
+    url(r'^cover_image$', views.cover_image),  # 封面地址
 
 ]

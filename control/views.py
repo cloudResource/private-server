@@ -20,8 +20,10 @@ def video_address(request):
     :param request:
     :return:
     """
+    video_name = request.GET.get('video_name')
+    if not video_name:
+        return JsonResponse(data={"message": "缺少必传参数", "status": 400})
     try:
-        video_name = request.GET.get('video_name')
         portion = os.path.splitext(video_name)
         if portion[1] != '.MP4':
             new_name = portion[0] + '.MP4'
@@ -60,13 +62,18 @@ def cover_image(request):
     :param request:
     :return:
     """
-    video_path = request.GET.get('video_path')
-    if not video_path:
+    image_path = request.GET.get('image_path')
+    if not image_path:
         return JsonResponse(data={"message": "缺少必传参数", "status": 400})
     try:
-        image_path = path.join(video_path)
+        image_path = path.join(image_path)
         image_data = open(image_path, "rb").read()
         return HttpResponse(image_data, content_type="image/png")
     except Exception as e:
         logger.error(e)
+        e = str(e)
+        pat = r"No such file or directory:"
+        result = re.findall(pat, e)
+        if result:
+            return JsonResponse(data={"error": "图片不存在", "status": 400})
         return JsonResponse(data={"message": "获取图片失败", "status": 400})
