@@ -10,8 +10,43 @@ import logging
 from werkzeug.wsgi import FileWrapper
 
 from control.service import *
+from control.utils.video import *
 
 logger = logging.getLogger("django.request")
+
+
+def video_start(request):
+    """
+    开始录制视频
+    :param request:
+    :return:
+    """
+    mac_address = request.POST.get('mac_address')
+    if not mac_address:
+        return JsonResponse(data={"error": "缺少必传参数", "status": 400})
+    try:
+        file_name = start_record(mac_address)
+        return JsonResponse(data={"file_name": file_name}, status=200)
+    except Exception as e:
+        logger.error(e)
+        return JsonResponse(data={"error": "开始录制失败", "status": 400}, status=400)
+
+
+def video_stop(request):
+    """
+    停止录制视频
+    :param request:
+    :return:
+    """
+    mac_address = request.POST.get('mac_address')
+    if not mac_address:
+        return JsonResponse(data={"error": "缺少必传参数", "status": 400})
+    try:
+        stop_record(mac_address)
+        return JsonResponse(data={"message": "结束录制成功", "status": 200})
+    except Exception as e:
+        logger.error(e)
+        return JsonResponse(data={"error": "结束录制失败", "status": 400}, status=400)
 
 
 def video_address(request):
@@ -20,20 +55,15 @@ def video_address(request):
     :param request:
     :return:
     """
-    video_name = request.GET.get('video_name')
-    if not video_name:
+    file_path = request.GET.get('file_path')
+    if not file_path:
         return JsonResponse(data={"message": "缺少必传参数", "status": 400})
     try:
-        portion = os.path.splitext(video_name)
-        if portion[1] != '.MP4':
-            new_name = portion[0] + '.MP4'
-            path = '/fsdata/videos/' + video_name + "/" + "h264_" + new_name
-        else:
-            path = '/fsdata/videos/' + video_name + "/" + "h264_" + video_name
+
         range_header = request.META.get('HTTP_RANGE', '').strip()
         range_match = range_re.match(range_header)
-        size = os.path.getsize(path)
-        content_type, encoding = mimetypes.guess_type(path)
+        size = os.path.getsize(file_path)
+        content_type, encoding = mimetypes.guess_type(file_path)
         content_type = content_type or 'application/octet-stream'
         if range_match:
             first_byte, last_byte = range_match.groups()
@@ -42,12 +72,12 @@ def video_address(request):
             if last_byte >= size:
                 last_byte = size - 1
             length = last_byte - first_byte + 1
-            resp = StreamingHttpResponse(RangeFileWrapper(open(path, 'rb'), offset=first_byte, length=length),
+            resp = StreamingHttpResponse(RangeFileWrapper(open(file_path, 'rb'), offset=first_byte, length=length),
                                          status=206, content_type=content_type)
             resp['Content-Length'] = str(length)
             resp['Content-Range'] = 'bytes %s-%s/%s' % (first_byte, last_byte, size)
         else:
-            resp = StreamingHttpResponse(FileWrapper(open(path, 'rb')), content_type=content_type)
+            resp = StreamingHttpResponse(FileWrapper(open(file_path, 'rb')), content_type=content_type)
             resp['Content-Length'] = str(size)
             resp['Accept-Ranges'] = 'bytes'
         return resp
