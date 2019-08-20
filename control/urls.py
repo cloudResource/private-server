@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^v1/cover_image$', views.cover_image),  # 封面地址
     url(r'^v1/video_start$', views.video_start),  # 开始录制视频
     url(r'^v1/video_stop$', views.video_stop),  # 停止录制视频
+    url(r'^v1/intercept_image$', views.intercept_image),  # 截取保存视频图片
 ]

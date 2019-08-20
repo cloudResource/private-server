@@ -25,11 +25,31 @@ def video_start(request):
     if not mac_address:
         return JsonResponse(data={"error": "缺少必传参数", "status": 400})
     try:
-        file_name = start_record(mac_address)
+        file_name = start_transcode_record(mac_address)
         return JsonResponse(data={"file_name": file_name}, status=200)
     except Exception as e:
         logger.error(e)
-        return JsonResponse(data={"error": "开始录制失败", "status": 400}, status=400)
+        return JsonResponse(data={"error": e, "status": 400}, status=400)
+
+
+def intercept_image(request):
+    """
+    截取保存视频图片
+    :param request:
+    :return:
+    """
+    dir_name = request.POST.get('dir_name')
+    second = request.POST.get('second')
+    if not all([dir_name, second]):
+        return JsonResponse(data={"error": "缺少必传参数", "status": 400})
+    try:
+        second = int(second)
+        scan_video_image(dir_name, second)
+        image_path = "/fsdata/videos/" + dir_name + "/playback/" + str(second) + ".png"
+        return JsonResponse(data={"image_path": image_path}, status=200)
+    except Exception as e:
+        logger.error(e)
+        return JsonResponse(data={"error": e, "status": 400}, status=400)
 
 
 def video_stop(request):
@@ -46,7 +66,7 @@ def video_stop(request):
         return JsonResponse(data={"message": "结束录制成功", "status": 200})
     except Exception as e:
         logger.error(e)
-        return JsonResponse(data={"error": "结束录制失败", "status": 400}, status=400)
+        return JsonResponse(data={"error": e, "status": 400}, status=400)
 
 
 def video_address(request):
