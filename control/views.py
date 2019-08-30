@@ -59,11 +59,24 @@ def video_stop(request):
     :return:
     """
     mac_address = request.POST.get('mac_address')
+    video_file = request.POST.get('video_file')
     if not mac_address:
         return JsonResponse(data={"error": "缺少必传参数", "status": 400})
     try:
         stop_record(mac_address)
-        return JsonResponse(data={"message": "结束录制成功", "status": 200})
+        video_path = "/fsdata/videos/" + video_file + "/"
+        note_list = os.listdir(video_path + "blackboard")
+        note_data = list()
+        for i in note_list:
+            note_dict = dict()
+            note_time, suffix = os.path.splitext(i)
+            note_path = video_path + "blackboard/" + i
+            note_thumb_path =video_path + "blackboard_thumb/" + i
+            note_dict["note_path"] = note_path
+            note_dict["note_thumb_path"] = note_thumb_path
+            note_dict["note_time"] = int(note_time)
+            note_data.append(note_dict)
+        return JsonResponse(data={"data": {"note_path": note_data}, "status": 200})
     except Exception as e:
         logger.error(e)
         return JsonResponse(data={"error": e, "status": 400}, status=400)

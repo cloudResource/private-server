@@ -4,7 +4,6 @@ from ctypes import *
 import time
 
 d = os.path.dirname(__file__)
-print("-----------------------------------LoadLibrary-------------------------------------")
 cur = cdll.LoadLibrary(d + '/libVideoCV.so')
 
 init_lib = cur.initLib
@@ -78,12 +77,15 @@ def stop_record(id):
 
 
 init_lib()
-# if __name__ == '__main__':
-#     init_lib()
-#     id = "b827ebe96bce"
-#     dir_path = start_transcode_record(id)
-#     print("sleep begin...")
-#     time.sleep(30)
-#     print("sleep complete...")
-#     stop_record(id)
-#     deinit_lib()
+if __name__ == '__main__':
+    init_lib()
+    id = "b827ebe96bce"
+    for i in range(10):
+        print("???????????????" + str(i) + "?????????????????")
+        dir_path = start_transcode_record(id)
+        time.sleep(10)
+        print("stop begin!!!")
+        stop_record(id)
+        print("stop complete!!!")
+    print("!!!!!!!!!!!!!!!!!!!!!!")
+    #deinit_lib()
