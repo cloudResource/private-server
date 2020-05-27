@@ -1,10 +1,8 @@
 #!/usr/bin/python3.6
 import os
 from ctypes import *
-import time
 
 d = os.path.dirname(__file__)
-print("-----------------------------------LoadLibrary-------------------------------------")
 cur = cdll.LoadLibrary(d + '/libVideoCV.so')
 
 init_lib = cur.initLib

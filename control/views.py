@@ -1,9 +1,7 @@
 import mimetypes
-import os
 from os import path
 
 from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
-from django.shortcuts import render
 import logging
 
 # Create your views here.
